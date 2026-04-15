@@ -42,12 +42,24 @@ def extract(file_path):
         list: Danh sach cac records (dictionaries)
     """
     print(f"Extracting data from {file_path}...")
-    # TODO: Viet code doc file JSON o day
-    # Vi du:
-    #   with open(file_path, 'r') as f:
-    #       data = json.load(f)
-    #   return data
-    pass
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        if not isinstance(data, list):
+            # If JSON root is a dict with records, try to convert, otherwise warn
+            print(f"Warning: expected list of records in {file_path}, got {type(data).__name__}")
+            return []
+
+        print(f"Extracted {len(data)} records.")
+        return data
+
+    except FileNotFoundError:
+        print(f"Error: source file {file_path} not found.")
+        return []
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON: {e}")
+        return []
 
 
 def validate(data):
@@ -69,10 +81,35 @@ def validate(data):
     valid_records = []
     error_count = 0
 
-    # TODO: Lap qua data, kiem tra tung record
-    # Giu lai record hop le, dem record loi
+    for rec in data:
+        if not isinstance(rec, dict):
+            error_count += 1
+            continue
 
-    print(f"Validation complete. Valid: {len(valid_records)}, Errors: {error_count}")
+        price = rec.get('price', None)
+        category = rec.get('category', None)
+
+        # Coerce price to number
+        try:
+            price_num = float(price)
+        except Exception:
+            error_count += 1
+            continue
+
+        # Validation rules
+        if price_num <= 0:
+            error_count += 1
+            continue
+
+        if category is None or str(category).strip() == '':
+            error_count += 1
+            continue
+
+        # Cleaned record: ensure numeric price
+        rec['price'] = price_num
+        valid_records.append(rec)
+
+    print(f"Validation summary: {len(valid_records)} processed, {error_count} drop(s)")
     return valid_records
 
 
@@ -94,8 +131,21 @@ def transform(data):
     Returns:
         pd.DataFrame: DataFrame da duoc transform
     """
-    # TODO: Tao DataFrame va ap dung transformations
-    pass
+    if not data:
+        print("No valid data to transform.")
+        return None
+
+    df = pd.DataFrame(data)
+
+    # Ensure price numeric and drop any remaining invalid rows
+    df['price'] = pd.to_numeric(df['price'], errors='coerce')
+    df = df[df['price'] > 0].copy()
+
+    df['discounted_price'] = df['price'] * 0.9
+    df['category'] = df['category'].astype(str).str.title()
+    df['processed_at'] = datetime.datetime.now().isoformat()
+
+    return df
 
 
 def load(df, output_path):
@@ -105,7 +155,16 @@ def load(df, output_path):
     Goi y:
        - df.to_csv(output_path, index=False)
     """
-    # TODO: Luu DataFrame ra CSV
+    if df is None:
+        print("No DataFrame to save.")
+        return
+
+    # Ensure directory exists
+    out_dir = os.path.dirname(output_path)
+    if out_dir and not os.path.exists(out_dir):
+        os.makedirs(out_dir, exist_ok=True)
+
+    df.to_csv(output_path, index=False)
     print(f"Data saved to {output_path}")
 
 

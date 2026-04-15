@@ -1,8 +1,8 @@
 # Experiment Report: Data Quality Impact on AI Agent
 
 **Student ID:** AI20K-XXXX
-**Name:** (Dien ten cua ban)
-**Date:** (Dien ngay thuc hien)
+**Name:** (Đào Danh Đăng Phụng)
+**Date:** (2026-04-15)
 
 ---
 
@@ -12,8 +12,8 @@ Chay `agent_simulation.py` voi 2 bo du lieu va ghi lai ket qua:
 
 | Scenario | Agent Response | Accuracy (1-10) | Notes |
 |----------|----------------|-----------------|-------|
-| Clean Data (`processed_data.csv`) | (Ghi cau tra loi cua Agent) | | |
-| Garbage Data (`garbage_data.csv`) | (Ghi cau tra loi cua Agent) | | |
+| Clean Data (`processed_data.csv`) | (Agent: Based on my data, the best choice is Laptop at $1200.0.) | (9) | (Agent picks the expected high-priced electronics from clean data.) |
+| Garbage Data (`garbage_data.csv`) | (Agent: Based on my data, the best choice is Nuclear Reactor at $999999.) | (2) | (Poisoned/outlier record (extreme price) causes wrong recommendation.) |
 
 ---
 
@@ -21,10 +21,7 @@ Chay `agent_simulation.py` voi 2 bo du lieu va ghi lai ket qua:
 
 ### Tai sao Agent tra loi sai khi dung Garbage Data?
 
-(Viet nhan xet cua ban o day — it nhat 50 tu)
-
-(Hay phan tich cac van de nhu Duplicate IDs, wrong data types, outliers, null values
-va giai thich tai sao chung anh huong den ket qua cua Agent.)
+(Agent trả lời sai khi dùng dữ liệu rác vì dữ liệu bị 'poisoned' có nhiều lỗi chất lượng. Các vấn đề chính gồm: outliers (giá cực lớn như 999999) làm thuật toán chọn theo giá bị lệch; kiểu dữ liệu không đúng (ví dụ 'ten dollars') gây lỗi khi chuyển sang số; giá trị null hoặc `category` rỗng làm mất khả năng phân loại; duplicate IDs gây sai lệch thống kê. Cần xử lý: loại bỏ/cắt tỉa outlier, chuyển đổi kiểu, loại bản ghi null, xử lý trùng lặp trước khi đưa vào agent.)
 
 ---
 
@@ -32,4 +29,4 @@ va giai thich tai sao chung anh huong den ket qua cua Agent.)
 
 **Quality Data > Quality Prompt?** (Dong y hay khong? Giai thich ngan gon.)
 
-(Viet ket luan cua ban o day)
+(Đồng ý. Nếu dữ liệu kém chất lượng thì prompt tốt cũng không đảm bảo kết quả đúng; chất lượng dữ liệu là yếu tố quyết định.)
